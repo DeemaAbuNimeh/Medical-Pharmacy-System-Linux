@@ -1,0 +1,39 @@
+#!/bin/bash
+
+while true; do
+  echo
+  echo " Welcome to the Pharmacy System "
+  echo "Please choose an option:"
+  echo "1 - Add a new drug to the system"
+  echo "2 - Modify existing drug information"
+  echo "3 - Search for drugs"
+  echo "4 - Dispense (prescribe) drugs"
+  echo "5 - Exit the system"
+ 
+  read -p "Your choice (1–5): " choice
+
+  if [[ "$choice" == "1" ]]; then
+ 
+    ./Adddrug 
+
+  elif [[ "$choice" == "2" ]]; then
+  
+    ./Modifydrug
+
+  elif [[ "$choice" == "3" ]]; then
+ 
+    ./Searchdrug 
+
+  elif [[ "$choice" == "4" ]]; then
+
+    ./Presdrug 
+
+  elif [[ "$choice" == "5" ]]; then
+    echo " Goodbye!"
+    break
+
+  else
+    echo "Invalid option. Please enter a number from 1 to 5."
+  fi
+done
+

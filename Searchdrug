@@ -1,0 +1,80 @@
+#!/bin/bash
+
+echo "Please choose an option:"
+echo "1 - Search by Drug ID"
+echo "2 - Search by Scientific or Trade Name"
+echo "3 - List Drugs by Expiration Date (Descending)"
+echo "4 - List Drugs by quanSt (Ascending)"
+echo "5 - Return to Main Menu"
+
+for (( ; ; )); do
+  echo ""
+  read -p "Enter your choice: " choiceSearch
+
+  case $choiceSearch in
+    1)
+      read -p "Enter the Drug ID to look for: " inputID
+      lineMatch=$(grep "^$inputID:" drugs)
+      if [[ $lineMatch != "" ]]; then
+        did=$(echo "$lineMatch" | cut -d: -f1)
+        dsc=$(echo "$lineMatch" | cut -d: -f2)
+        dtr=$(echo "$lineMatch" | cut -d: -f3)
+        dpr=$(echo "$lineMatch" | cut -d: -f4)
+        dmf=$(echo "$lineMatch" | cut -d: -f5)
+        dex=$(echo "$lineMatch" | cut -d: -f6)
+        quanSt=$(echo "$lineMatch" | cut -d: -f7)
+        echo "ID: $did | Scientific: $dsc | Trade: $dtr | Price: $dpr | Mfg: $dmf | Exp: $dex | quanSt: $quanSt"
+      else
+        echo "No match found for Drug ID $inputID."
+      fi
+      ;;
+
+    2)
+      read -p "Enter part/full Scientific or Trade Name: " inputName
+      cat drugs | grep -i "$inputName" | sort -t: -k3 | while read line; do
+        fid=$(echo "$line" | cut -d: -f1)
+        fsc=$(echo "$line" | cut -d: -f2)
+        ftr=$(echo "$line" | cut -d: -f3)
+        fpr=$(echo "$line" | cut -d: -f4)
+        fmf=$(echo "$line" | cut -d: -f5)
+        fex=$(echo "$line" | cut -d: -f6)
+        quanSt=$(echo "$line" | cut -d: -f7)
+        echo "ID: $fid | Scientific: $fsc | Trade: $ftr | Price: $fpr | Mfg: $fmf | Exp: $fex | quanSt: $quanSt"
+      done
+      ;;
+
+    3)
+      cat drugs | sort -t: -k6 -r | while read line; do
+        eid=$(echo "$line" | cut -d: -f1)
+        esc=$(echo "$line" | cut -d: -f2)
+        etr=$(echo "$line" | cut -d: -f3)
+        epr=$(echo "$line" | cut -d: -f4)
+        emf=$(echo "$line" | cut -d: -f5)
+        eex=$(echo "$line" | cut -d: -f6)
+        quanSt=$(echo "$line" | cut -d: -f7)
+        echo "ID: $eid | Scientific: $esc | Trade: $etr | Price: $epr | Mfg: $emf | Exp: $eex | quanSt: $quanSt"
+      done
+      ;;
+
+    4)
+      cat drugs | sort -t: -k7 -n | while read line; do
+        qid=$(echo "$line" | cut -d: -f1)
+        qsc=$(echo "$line" | cut -d: -f2)
+        qtr=$(echo "$line" | cut -d: -f3)
+        qpr=$(echo "$line" | cut -d: -f4)
+        qmf=$(echo "$line" | cut -d: -f5)
+        qex=$(echo "$line" | cut -d: -f6)
+        quanSt=$(echo "$line" | cut -d: -f7)
+        echo "ID: $qid | Scientific: $qsc | Trade: $qtr | Price: $qpr | Mfg: $qmf | Exp: $qex | quanSt: $quanSt"
+      done
+      ;;
+
+    5)
+      break
+      ;;
+
+    *)
+      echo "Invalid choice. Try again."
+      ;;
+  esac
+done

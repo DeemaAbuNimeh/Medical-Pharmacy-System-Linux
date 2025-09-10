@@ -1,0 +1,69 @@
+#!/bin/bash
+
+while true; do
+  read -p "Please enter a new 4-digit Drug ID: " drugID
+
+  if grep -q "^$drugID:" drugs; then
+    echo "This Drug ID already exists. Try a different one."
+    continue
+  fi
+
+  if [[ $drugID =~ ^[0-9]{4}$ ]]; then
+    break
+  else
+    echo "Drug ID must be exactly 4 digits (numbers only)."
+  fi
+done
+
+while true; do
+  read -p "Enter the Scientific Name (letters, '-' or '/' only): " scientificName
+  if [[ $scientificName =~ ^[A-Za-z/-]+$ ]]; then
+    break
+  else
+    echo "Invalid scientific name. Use only letters, dashes (-), or slashes (/)."
+  fi
+done
+
+while true; do
+  read -p "Enter the Trade Name (must start with a letter): " tradeName
+  if [[ $tradeName =~ ^[A-Za-z/-][A-Za-z0-9/-]*$ ]]; then
+    break
+  else
+    echo "Trade name must begin with a letter and can include numbers, '-', or '/'."
+  fi
+done
+
+while true; do
+  read -p "Enter the Price (numbers only): " price
+  if [[ $price =~ ^[0-9]+$ ]]; then
+    break
+  else
+    echo "Price must contain digits only."
+  fi
+done
+
+while true; do
+  read -p "Enter the Manufacturing Date in this format (dd/mm/yyyy): " manufactureDate
+  if echo "$manufactureDate" | grep -q '^[0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]$'; then
+    break
+  else
+    echo "Invalid date format. Use dd/mm/yyyy format."
+  fi
+done
+
+day=$(echo $manufactureDate | cut -d/ -f1)
+month=$(echo $manufactureDate | cut -d/ -f2)
+year=$(echo $manufactureDate | cut -d/ -f3)
+expiryDate=$(date -d "$year-$month-$day +547 days" +%d/%m/%Y)
+
+while true; do
+  read -p "Enter the Quantity in stock (digits only): " quantity
+  if [[ $quantity =~ ^[0-9]+$ ]]; then
+    break
+  else
+    echo "Quantity must be numeric."
+  fi
+done
+
+echo "$drugID:$scientificName:$tradeName:$price:$manufactureDate:$expiryDate:$quantity" >> drugs
+echo "Drug record added successfully!"

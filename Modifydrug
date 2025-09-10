@@ -1,0 +1,76 @@
+#!/bin/bash
+
+echo ""
+echo "Select an action:"
+echo "1 - Delete a Drug Record"
+echo "2 - Modify a Drug Record"
+read -p "Your choice: " actionChoice
+
+case $actionChoice in
+  1)
+    read -p "Enter Drug ID to remove: " DrugidDel
+
+    if ! grep -q "^$DrugidDel:" drugs; then
+      echo "Drug ID $DrugidDel not found."
+    else
+      grep -v "^$DrugidDel:" drugs > tempdrugs && mv tempdrugs drugs
+      echo "Drug ID $DrugidDel was successfully removed."
+    fi
+    ;;
+
+  2)
+    read -p "Enter Drug ID to modify: " DrugidMod
+    DrugLine=$(grep "^$DrugidMod:" drugs)
+
+    if [ "$DrugLine" = "" ]; then
+      echo "Drug ID $DrugidMod not found."
+    else
+      Drugid=$(echo "$DrugLine" | cut -d: -f1)
+      DScname=$(echo "$DrugLine" | cut -d: -f2)
+      DTSname=$(echo "$DrugLine" | cut -d: -f3)
+      Dprice=$(echo "$DrugLine" | cut -d: -f4)
+      Dmoddate=$(echo "$DrugLine" | cut -d: -f5)
+      Dexpdate=$(echo "$DrugLine" | cut -d: -f6)
+      DrugInfo=$(echo "$DrugLine" | cut -d: -f7)
+
+      echo ""
+      read -p "New Scientific Name (or press Enter to retain [$DScname]): " newSciName
+      if [ "$newSciName" != "" ]; then
+        DScname=$newSciName
+      fi
+
+      read -p "New Trade Name (or press Enter to retain [$DTSname]): " newTradeName
+      if [ "$newTradeName" != "" ]; then
+        DTSname=$newTradeName
+      fi
+
+      read -p "New Price (or press Enter to retain [$Dprice]): " newPrice
+      if echo "$newPrice" | grep -q '^[0-9]\+$'; then
+        Dprice=$newPrice
+      fi
+
+      read -p "New Manufacturing Date (dd/mm/yyyy) or press Enter to retain [$Dmoddate]: " newMfgDate
+      if [ "$newMfgDate" != "" ]; then
+        if echo "$newMfgDate" | grep -q '^[0-9]\{2\}/[0-9]\{2\}/[0-9]\{4\}$'; then
+          Dmoddate=$newMfgDate
+          day=$(echo $Dmoddate | cut -d/ -f1)
+          month=$(echo $Dmoddate | cut -d/ -f2)
+          year=$(echo $Dmoddate | cut -d/ -f3)
+          Dexpdate=$(date -d "$year-$month-$day +547 days" +%d/%m/%Y)
+        fi
+      fi
+
+      read -p "New Quantity (or press Enter to retain [$DrugInfo]): " newQty
+      if echo "$newQty" | grep -q '^[0-9]\+$'; then
+        DrugInfo=$newQty
+      fi
+
+      grep -v "^$Drugid:" drugs > tempdrugs && mv tempdrugs drugs
+      echo "$Drugid:$DScname:$DTSname:$Dprice:$Dmoddate:$Dexpdate:$DrugInfo" >> drugs
+      echo "Drug ID $Drugid has been updated successfully."
+    fi
+    ;;
+  *)
+    echo "Invalid choice. Please select either 1 or 2."
+    ;;
+esac

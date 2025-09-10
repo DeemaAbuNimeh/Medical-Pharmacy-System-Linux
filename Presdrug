@@ -1,0 +1,57 @@
+#!/bin/bash
+
+finalCost=0
+
+for (( ; ; )); do
+  echo ""
+  read -p "Insert Drug ID or Trade Label (type 'stop' to exit): " drugInput
+
+  if [ "$drugInput" = "stop" ]; then
+    echo "Final cost for all dispensed items: $finalCost"
+    break
+  fi
+
+  drugMatch=$(grep -i "^$drugInput:" drugs)
+
+  if [ "$drugMatch" = "" ]; then
+    drugMatch=$(grep -i ":$drugInput:" drugs)
+  fi
+
+  if [ "$drugMatch" = "" ]; then
+    echo "No drug matched the input provided."
+    continue
+  fi
+
+  dID=$(echo "$drugMatch" | cut -d: -f1)
+  dSci=$(echo "$drugMatch" | cut -d: -f2)
+  dTrade=$(echo "$drugMatch" | cut -d: -f3)
+  dCost=$(echo "$drugMatch" | cut -d: -f4)
+  dMfg=$(echo "$drugMatch" | cut -d: -f5)
+  dExp=$(echo "$drugMatch" | cut -d: -f6)
+  quanSt=$(echo "$drugMatch" | cut -d: -f7)
+
+  echo "ID: $dID | Scientific: $dSci | Trade: $dTrade | Price: $dCost | Available: $quanSt"
+
+  read -p "Amount to dispense: " dispenseQty
+
+  if ! [[ "$dispenseQty" =~ ^[0-9]+$ ]]; then
+    echo "Invalid entry. Quantity must be digits only."
+    continue
+  fi
+
+  if [ "$dispenseQty" -gt "$quanSt" ]; then
+    echo "Insufficient stock available for the requested quantity."
+    continue
+  fi
+
+  updatedQty=$((quanSt - dispenseQty))
+  updatedLine="$dID:$dSci:$dTrade:$dCost:$dMfg:$dExp:$updatedQty"
+
+  grep -v "^$dID:" drugs > drugsTemp && mv drugsTemp drugs
+  echo "$updatedLine" >> drugs
+
+  costPerItem=$((dispenseQty * dCost))
+  finalCost=$((finalCost + costPerItem))
+
+  echo "Item dispensed. Cost incurred: $costPerItem"
+done
